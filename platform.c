@@ -60,10 +60,18 @@
 #define cr_pad_fcn_ctl_adr3                            0x003201a8
 #define iocfg_p0_adr                                   0x00650cd0
 #define iocfg_p1_adr                                   0x00650cd4
+#define iocfg_p2_adr                                   0x00650cd8
+#define iocfg_p3_adr                                   0x00650cdc
+#define iocfg_p4_adr                                   0x00650ce0
+#define iocfg_p5_adr                                   0x00650ce4
 #define iocfg_p9_adr                                   0x00650cf4
 #define iocfg_p11_adr                                  0x00650cfc
 #define iocfg_fcn_p0_adr                               0x00438400
 #define iocfg_fcn_p1_adr                               0x00438404
+#define iocfg_fcn_p2_adr                               0x00438408
+#define iocfg_fcn_p3_adr                               0x0043840c
+#define iocfg_fcn_p4_adr                               0x00438410
+#define iocfg_fcn_p5_adr                               0x00438414
 #define iocfg_fcn_p9_adr                               0x00438424
 #define iocfg_fcn_p11_adr                              0x0043842c
 #define iocfg_premux_0_adr                             0x004383a4
@@ -250,21 +258,26 @@ void wiced_hal_gpio_select_function_local(wiced_bt_gpio_numbers_t gpio, wiced_bt
 #if !USE_DESIGN_MODUS
 void wiced_platform_spi_init(void)
 {
-    //P0 - nCS
-    //P1 - MOSI
-    //P9 - MISO
-    //P11- SCK
-    REG32(iocfg_p0_adr) = 0x000;  REG32(iocfg_fcn_p0_adr) = 0x514;
+    //P0 - nCS  - RSVD_2
+    //P3 - SCK  - RSVD_5
+    //P4 - MOSI - RSVD_6
+    //P5 - MISO - RSVD_7
+
+    REG32(iocfg_p0_adr) = 0x000;
+    REG32(iocfg_fcn_p0_adr) = 0x514;
     REG32(iocfg_premux_0_adr) = (REG32(iocfg_premux_0_adr) & 0x00ffffff) | ((0+1) << 24);
 
-    REG32(iocfg_p1_adr) = 0x000;  REG32(iocfg_fcn_p1_adr) = 0x524;
-    REG32(iocfg_premux_1_adr) = (REG32(iocfg_premux_1_adr) & 0xffffff00) | ((1+1) << 0);
+    REG32(iocfg_p3_adr) = 0x000;
+    REG32(iocfg_fcn_p3_adr) = 0x504;
+    REG32(iocfg_premux_1_adr) = (REG32(iocfg_premux_1_adr) & 0xffffff00) | ((3+1) << 0);
 
-    REG32(iocfg_p9_adr) = 0x000;  REG32(iocfg_fcn_p9_adr) = 0x534;
-    REG32(iocfg_premux_1_adr) = (REG32(iocfg_premux_1_adr) & 0xffff00ff) | ((9+1) << 8);
+    REG32(iocfg_p4_adr) = 0x000;
+    REG32(iocfg_fcn_p4_adr) = 0x524;
+    REG32(iocfg_premux_1_adr) = (REG32(iocfg_premux_1_adr) & 0xffff00ff) | ((4+1) << 8);
 
-    REG32(iocfg_p11_adr) = 0x000;  REG32(iocfg_fcn_p11_adr) = 0x504;
-    REG32(iocfg_premux_0_adr) = (REG32(iocfg_premux_0_adr) & 0xff00ffff) | ((11+1) << 16);
+    REG32(iocfg_p5_adr) = 0x000;
+    REG32(iocfg_fcn_p5_adr) = 0x534;
+    REG32(iocfg_premux_0_adr) = (REG32(iocfg_premux_0_adr) & 0xff00ffff) | ((5+1) << 16);
 
     REG32(cr_pad_fcn_ctl_lhl_0_adr) = REG32(cr_pad_fcn_ctl_lhl_0_adr) | 0x80000000;
     REG32(cr_pad_fcn_ctl_lhl_1_adr) = (REG32(cr_pad_fcn_ctl_lhl_1_adr) & 0xfffffff0) | 0x0d;
@@ -272,17 +285,17 @@ void wiced_platform_spi_init(void)
 
 void wiced_platform_i2s_init(void)
 {
+    // Mux to BT_PCM_IN to I2S_DI
+    REG32(cr_pad_config_adr4) = (REG32(cr_pad_config_adr4) & 0xFF00FFFF) | (0x09 << 0);
+    REG32(cr_pad_fcn_ctl_adr1) = (REG32(cr_pad_fcn_ctl_adr1) & 0xf0ffffff) | (0x07 << 12);
+
+    // Mux to BT_PCM_OUT to I2S_DO
+    REG32(cr_pad_config_adr4) = (REG32(cr_pad_config_adr4) & 0xFFFF00FF) | (0x88 << 8);
+    REG32(cr_pad_fcn_ctl_adr1) = (REG32(cr_pad_fcn_ctl_adr1) & 0xfff0ffff) | (0x05 << 16);
+
     // Mux to BT_PCM_SYNC to I2S_WS
     REG32(cr_pad_config_adr4) = (REG32(cr_pad_config_adr4) & 0x00FFFFFF) | (0x88 << 24);
     REG32(cr_pad_fcn_ctl_adr1) = (REG32(cr_pad_fcn_ctl_adr1) & 0xff0fffff) | (0x05 << 20);
-
-    // Mux to BT_I2S_DO to I2S_DO
-    REG32(cr_pad_config_adr7) = (REG32(cr_pad_config_adr7) & 0xFFFFFF00) | (0x88 << 0);
-    REG32(cr_pad_fcn_ctl_adr2) = (REG32(cr_pad_fcn_ctl_adr2) & 0xfff0ffff) | (0x05 << 16);
-
-    // Mux to BT_I2S_DI to I2S_DI
-    REG32(cr_pad_config_adr7) = (REG32(cr_pad_config_adr7) & 0xFF00FFFF) | (0x09 << 16);
-    REG32(cr_pad_fcn_ctl_adr2) = (REG32(cr_pad_fcn_ctl_adr2) & 0xf0ffffff) | (0x04 << 24);
 
     // Mux to BT_PCM_CLK to I2S_SCK
     REG32(cr_pad_config_adr4) = (REG32(cr_pad_config_adr4) & 0xFF00FFFF) | (0x88 << 16);
@@ -470,10 +483,10 @@ void wiced_platform_init(void)
     wiced_bt_app_hal_init();
     wiced_platform_warm_up();
     debug_uart_enable(115200);
-	wiced_set_debug_uart( WICED_ROUTE_DEBUG_TO_DBG_UART );
-    //wiced_platform_spi_init();
-    //wiced_platform_i2s_init();
-    //wiced_platform_i2c_init();
+    wiced_set_debug_uart( WICED_ROUTE_DEBUG_TO_DBG_UART );
+    wiced_platform_spi_init();
+    wiced_platform_i2s_init();
+    wiced_platform_i2c_init();
     wiced_platform_button_init();
 
     result = platform_mem_init();

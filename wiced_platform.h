@@ -74,6 +74,14 @@ typedef enum
  */
 typedef void (wiced_platform_transport_rx_data_handler)(uint16_t op_code, uint8_t *p_data, uint32_t data_len);
 
+
+/*! pin for button 1 */
+#define WICED_GPIO_PIN_BUTTON_1       WICED_GPIO_04
+#define WICED_GPIO_PIN_BUTTON         WICED_GPIO_PIN_BUTTON_1
+
+/*! pin for LED 1 */
+#define WICED_GPIO_PIN_LED_1          WICED_GPIO_03
+
 //! Possible interrupt configuration for platform buttons
 typedef enum
 {
@@ -369,3 +377,4 @@ extern wiced_debug_uart_types_t wiced_debug_uart;
 /* utility functions */
 uint32_t wiced_platform_get_button_pressed_value(wiced_platform_button_number_t button);
 void     wiced_platform_register_button_callback(wiced_platform_button_number_t button, void (*userfn)(void*, uint8_t), void* userdata, wiced_platform_button_interrupt_edge_t trigger_edge);
+void debug_uart_set_baudrate(uint32_t baud_rate);
