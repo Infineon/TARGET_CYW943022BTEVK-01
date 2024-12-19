@@ -17,6 +17,18 @@ ENTRY "BT MPAF FRAMEWORK"
     "MPAF PKT TYPE" = 0x19
     "mm_Sbrk_Limit" = 0x0
 }
+
+ENTRY "Data" = "g_bt_config_aa_pool_size"
+{
+    "Address" = 0x203528
+    "Data" =
+    COMMENTED_BYTES
+    {
+        <hex>
+        00 00 00 00
+    } END_COMMENTED_BYTES
+}
+
 ################################################################################
 ##
 ## End 43022C1 Platform configuration
